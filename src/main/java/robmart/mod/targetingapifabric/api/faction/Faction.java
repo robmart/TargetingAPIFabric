@@ -25,7 +25,7 @@ public class Faction implements IFaction {
     private final Map<String, UUID> unprocessedData = new HashMap<>();
 
     public Faction(String name) {
-        this(name, false);
+        this(name, true);
     }
 
     public Faction(String name, boolean permanent) {
@@ -371,6 +371,7 @@ public class Faction implements IFaction {
     public CompoundTag writeToNbt(CompoundTag compound) {
         if (compound == null || !getIsPermanent()) return null;
 
+        compound.putString("Class", this.getClass().getName());
         compound.putString("Name", getName());
 
         memberClasses.forEach(mclass -> compound.putString("MemberClass" + memberClasses.indexOf(mclass), mclass.getName()));
