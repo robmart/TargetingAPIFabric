@@ -96,7 +96,7 @@ curseforge {
         }
     }
     options {
-        debug = true
+        debug = false
         forgeGradleIntegration = false
     }
 }
