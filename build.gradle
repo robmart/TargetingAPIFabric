@@ -84,16 +84,20 @@ curseforge {
         id = '403888'
         changelog = 'Changes'
         releaseType = 'release'
+        addGameVersion(minecraft_version)
+        addGameVersion("Java 10")
 
         mainArtifact remapJar
         addArtifact sourcesJar
 
         relations {
-            requiredLibrary('fabric')
+            requiredDependency 'fabric-api'
+            requiredDependency 'cardinal-components'
         }
     }
     options {
         debug = true
+        forgeGradleIntegration = false
     }
 }
 
