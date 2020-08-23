@@ -17,7 +17,12 @@ public class FactionManager implements IFactionManager {
     public void readFromNbt(CompoundTag tag) {
         tag.getKeys().forEach(key -> {
             CompoundTag tag2 = (CompoundTag) tag.get(key);
-            Faction faction = new Faction(tag2.getString("Name"), true);
+            Faction faction = null;
+            try {
+                faction = (Faction) Class.forName(tag2.getString("Class")).getConstructor(String.class).newInstance(tag2.getString("Name"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             Targeting.registerFaction(faction);
             faction.readFromNbt(tag2);
         });
