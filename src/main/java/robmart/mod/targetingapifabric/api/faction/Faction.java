@@ -2,7 +2,7 @@ package robmart.mod.targetingapifabric.api.faction;
 
 import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
@@ -192,7 +192,7 @@ public class Faction implements IFaction {
     public boolean isMember(Class<? extends Entity> potentialMember){
         if (potentialMember == null) return false;
         for (Class<? extends Entity> member : this.memberClasses){
-            if (member.isAssignableFrom(potentialMember))
+            if (member.isAssignableFrom(potentialMember) || potentialMember.isAssignableFrom(member))
                 return true;
         }
 
@@ -214,7 +214,7 @@ public class Faction implements IFaction {
     public boolean isFriend(Class<? extends Entity> potentialFriend){
         if (potentialFriend == null) return false;
         for (Class<? extends Entity> member : this.friendClasses){
-            if (member.isAssignableFrom(potentialFriend))
+            if (member.isAssignableFrom(potentialFriend) || potentialFriend.isAssignableFrom(member))
                 return true;
         }
 
@@ -236,7 +236,7 @@ public class Faction implements IFaction {
     public boolean isEnemy(Class<? extends Entity> potentialEnemy){
         if (potentialEnemy == null) return false;
         for (Class<? extends Entity> member : this.enemyClasses){
-            if (member.isAssignableFrom(potentialEnemy))
+            if (member.isAssignableFrom(potentialEnemy) || potentialEnemy.isAssignableFrom(member))
                 return true;
         }
 
@@ -287,7 +287,7 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public void readFromNbt(CompoundTag tag) {
+    public void readFromNbt(NbtCompound tag) {
         //Classes
         int i = 0;
         while (tag.contains("MemberClass" + i)) {
@@ -368,7 +368,7 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public CompoundTag writeToNbt(CompoundTag compound) {
+    public NbtCompound writeToNbt(NbtCompound compound) {
         if (compound == null || !getIsPermanent()) return null;
 
         compound.putString("Class", this.getClass().getName());

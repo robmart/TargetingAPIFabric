@@ -1,6 +1,6 @@
 package robmart.mod.targetingapifabric.api.faction.manager;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.WorldProperties;
 import net.minecraft.world.level.LevelProperties;
 import robmart.mod.targetingapifabric.api.Targeting;
@@ -14,22 +14,22 @@ public class FactionManager implements IFactionManager {
     }
 
     @Override
-    public void readFromNbt(CompoundTag tag) {
+    public void readFromNbt(NbtCompound tag) {
         tag.getKeys().forEach(key -> {
-            CompoundTag tag2 = (CompoundTag) tag.get(key);
-            Faction faction = null;
+            NbtCompound tag2 = (NbtCompound) tag.get(key);
+            Faction faction;
             try {
                 faction = (Faction) Class.forName(tag2.getString("Class")).getConstructor(String.class).newInstance(tag2.getString("Name"));
+                Targeting.registerFaction(faction);
+                faction.readFromNbt(tag2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Targeting.registerFaction(faction);
-            faction.readFromNbt(tag2);
         });
     }
 
     @Override
-    public void writeToNbt(CompoundTag tag) {
-        Targeting.getFactionMap().forEach((s, faction) -> tag.put(s, faction.writeToNbt(new CompoundTag())));
+    public void writeToNbt(NbtCompound tag) {
+        Targeting.getFactionMap().forEach((s, faction) -> tag.put(s, faction.writeToNbt(new NbtCompound())));
     }
 }
