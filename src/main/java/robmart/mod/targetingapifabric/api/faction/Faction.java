@@ -192,7 +192,7 @@ public class Faction implements IFaction {
     public boolean isMember(Class<? extends Entity> potentialMember){
         if (potentialMember == null) return false;
         for (Class<? extends Entity> member : this.memberClasses){
-            if (member.isAssignableFrom(potentialMember))
+            if (member.isAssignableFrom(potentialMember) || potentialMember.isAssignableFrom(member))
                 return true;
         }
 
@@ -214,7 +214,7 @@ public class Faction implements IFaction {
     public boolean isFriend(Class<? extends Entity> potentialFriend){
         if (potentialFriend == null) return false;
         for (Class<? extends Entity> member : this.friendClasses){
-            if (member.isAssignableFrom(potentialFriend))
+            if (member.isAssignableFrom(potentialFriend) || potentialFriend.isAssignableFrom(member))
                 return true;
         }
 
@@ -236,7 +236,7 @@ public class Faction implements IFaction {
     public boolean isEnemy(Class<? extends Entity> potentialEnemy){
         if (potentialEnemy == null) return false;
         for (Class<? extends Entity> member : this.enemyClasses){
-            if (member.isAssignableFrom(potentialEnemy))
+            if (member.isAssignableFrom(potentialEnemy) || potentialEnemy.isAssignableFrom(member))
                 return true;
         }
 

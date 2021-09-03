@@ -199,7 +199,7 @@ public class Targeting {
      */
     public static boolean checkFactionFriends(Entity caster, Entity target){
         for (Faction faction : factionMap.values()){
-            if (faction.isMember(caster) && faction.isFriend(target)){
+            if ((faction.isMember(caster) && faction.isFriend(target)) || (faction.isMember(target) && faction.isFriend(caster))){
                 return true;
             }
         }
@@ -241,7 +241,7 @@ public class Targeting {
     public static boolean isValidEnemy(Entity caster, Entity target) {
         if (isFriendly(caster, target)) return false;
         for (Faction faction : factionMap.values()) {
-            if (faction.isMember(caster) && faction.isEnemy(target))
+            if ((faction.isMember(caster) && faction.isEnemy(target)) || (faction.isMember(target) && faction.isEnemy(caster)))
                 return true;
         }
 

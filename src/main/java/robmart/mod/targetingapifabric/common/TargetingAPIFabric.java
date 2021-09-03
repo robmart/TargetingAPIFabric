@@ -46,8 +46,6 @@ public class TargetingAPIFabric implements ModInitializer {
             }
         }));
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> {
-            CommandFaction.register(dispatcher);
-        });
+        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> CommandFaction.register(dispatcher));
     }
 }
