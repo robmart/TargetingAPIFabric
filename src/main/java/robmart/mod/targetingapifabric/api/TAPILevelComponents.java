@@ -8,7 +8,7 @@ import net.minecraft.util.Identifier;
 import robmart.mod.targetingapifabric.api.faction.manager.FactionManager;
 import robmart.mod.targetingapifabric.api.faction.manager.IFactionManager;
 
-public class TAPIComponents implements LevelComponentInitializer {
+public class TAPILevelComponents implements LevelComponentInitializer {
     /**
     * You are never supposed to use this
      */
@@ -17,6 +17,6 @@ public class TAPIComponents implements LevelComponentInitializer {
 
     @Override
     public void registerLevelComponentFactories(LevelComponentFactoryRegistry registry) {
-        registry.register(FACTION_MANAGER, level -> new FactionManager(level));
+        registry.register(FACTION_MANAGER, FactionManager::new);
     }
 }

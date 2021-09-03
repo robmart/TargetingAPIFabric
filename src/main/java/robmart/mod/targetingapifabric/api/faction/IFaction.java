@@ -2,7 +2,7 @@ package robmart.mod.targetingapifabric.api.faction;
 
 import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.Set;
 
@@ -54,6 +54,6 @@ public interface IFaction {
     boolean isEnemy(Class<? extends Entity> potentialEnemy);
     boolean isEnemy(Entity potentialEnemy);
     void refreshPlayers();
-    void readFromNbt(CompoundTag nbt);
-    CompoundTag writeToNbt(CompoundTag nbt);
+    void readFromNbt(NbtCompound nbt);
+    NbtCompound writeToNbt(NbtCompound nbt);
 }

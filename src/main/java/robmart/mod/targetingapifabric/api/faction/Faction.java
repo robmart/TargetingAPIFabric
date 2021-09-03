@@ -2,7 +2,7 @@ package robmart.mod.targetingapifabric.api.faction;
 
 import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
@@ -287,7 +287,7 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public void readFromNbt(CompoundTag tag) {
+    public void readFromNbt(NbtCompound tag) {
         //Classes
         int i = 0;
         while (tag.contains("MemberClass" + i)) {
@@ -368,7 +368,7 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public CompoundTag writeToNbt(CompoundTag compound) {
+    public NbtCompound writeToNbt(NbtCompound compound) {
         if (compound == null || !getIsPermanent()) return null;
 
         compound.putString("Class", this.getClass().getName());

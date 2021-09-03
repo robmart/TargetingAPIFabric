@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.5.12'
+    id 'fabric-loom' version '0.9-SNAPSHOT'
     id 'maven-publish'
     id "com.matthewprenger.cursegradle" version "1.4.0"
 }
@@ -11,19 +11,22 @@ repositories {
 
     maven {
         name = "Ladysnake Libs"
-        url = "https://dl.bintray.com/ladysnake/libs"
+        url = 'https://ladysnake.jfrog.io/artifactory/mods'
     }
 
     maven {
         name = "Fabric Maven"
         url = "https://maven.fabricmc.net"
     }
+
+    maven {
+        name = "TerraformersMC"
+        url = "https://maven.terraformersmc.com/releases"
+    }
 }
 
-ext.priv = parseConfig(file('private.properties'))
-
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = JavaVersion.VERSION_16
+targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
@@ -38,10 +41,10 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-    modImplementation "io.github.prospector:modmenu:1.14.6+build.31"
+    modImplementation "com.terraformersmc:modmenu:2.0.9"
 
-    modApi "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:2.5.1"
-    modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-level:2.5.1"
+    modApi "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-base:3.1.1"
+    modImplementation "io.github.onyxstudios.Cardinal-Components-API:cardinal-components-level:3.1.1"
 
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
@@ -77,8 +80,8 @@ jar {
 }
 
 curseforge {
-    //if (!priv.hasProperty("curseforge_api_key")) return
-    apiKey = priv.curseforge_api_key
+    //if (!project.hasProperty("curseforge_api_key")) return
+    apiKey = curseforge_api_key
 
     project {
         id = '403888'
@@ -98,17 +101,5 @@ curseforge {
     options {
         debug = false
         forgeGradleIntegration = false
-    }
-}
-
-def parseConfig(File config) {
-    if(config.exists()){
-        config.withReader {
-            def prop = new Properties()
-            prop.load(it)
-            return (new ConfigSlurper().parse(prop))
-        }
-    } else {
-        return null
     }
 }
