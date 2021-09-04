@@ -1,7 +1,6 @@
 package robmart.mod.targetingapifabric.api;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.TameableEntity;
@@ -10,28 +9,24 @@ import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.scoreboard.Team;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.function.BiFunction;
+import java.util.*;
 
 public class Targeting {
 
-    private static HashMap<String, Faction> factionMap = Maps.newHashMap();
+    private static final List<Faction> factionList = new ArrayList<>();
 
     /**
      * Gets an immutable shallow copy of the faction map
      */
-    public static ImmutableMap<String, Faction> getFactionMap() {
-        return ImmutableMap.copyOf(factionMap);
+    public static ImmutableList<Faction> getFactionList() {
+        return ImmutableList.copyOf(factionList);
     }
 
     /**
-     * Clears all factions. DO NOT uses this unless you know the consequences
+     * Clears all factions. DO NOT use this unless you know the consequences
      */
     public static void clearFactions(){
-        factionMap.clear();
+        factionList.clear();
     }
 
     /**
@@ -39,11 +34,11 @@ public class Targeting {
      * @param newFaction The faction that should be registered
      */
     public static void registerFaction(Faction newFaction){
-        for (String name : factionMap.keySet()) {
-            if (name.equals(newFaction.getName()))
+        for (Faction faction : factionList) {
+            if (faction.getName().equals(newFaction.getName()))
                 return;
         }
-        factionMap.put(newFaction.getName(), newFaction);
+        factionList.add(newFaction);
     }
 
     /**
@@ -51,10 +46,7 @@ public class Targeting {
      * @param faction The faction that should be removed
      */
     public static void disbandFaction(Faction faction){
-        for (String name : factionMap.keySet()) {
-            if (name.equals(faction.getName()))
-                factionMap.remove(faction.getName());
-        }
+        factionList.removeIf(faction1 -> faction == faction1);
     }
 
     /**
@@ -63,14 +55,18 @@ public class Targeting {
      * @return The requested faction
      */
     public static Faction getFaction(String factionName){
-        return factionMap.get(factionName);
+        for (Faction faction : factionList) {
+            if (faction.getName().equals(factionName))
+                return faction;
+        }
+        return null;
     }
 
     public static List<Faction> getFactionsFromEntity(Entity entity) {
         List<Faction> factionList = new ArrayList<>();
-        for (Faction faction : factionMap.values()) {
+        for (Faction faction : Targeting.factionList) {
             if (faction.isMember(entity))
-                factionList.add((Faction) faction);
+                factionList.add(faction);
         }
         return factionList;
     }
@@ -133,15 +129,14 @@ public class Targeting {
             return getRootEntity(controller);
         }
 
-        if (source instanceof TameableEntity) {
-            TameableEntity owned = (TameableEntity) source;
+        if (source instanceof TameableEntity owned) {
             Entity owner = owned.getOwner();
             if (owner != null) {
                 // Owner is online, so use it for relationship checks
                 return getRootEntity(owner);
             } else if (owned.getOwner() != null) {
                 // Entity is owned, but the owner is offline
-                // If the owner if offline then there's not much we can do.
+                // If the owner is offline then there's not much we can do.
                 return source;
             }
         }
@@ -168,14 +163,14 @@ public class Targeting {
             return TargetRelationEnum.FRIEND;
 
         // Friends
-        for (Faction faction : factionMap.values()){
+        for (Faction faction : factionList){
             if ((faction.isMember(source) && faction.isFriend(target)) || (faction.isMember(target) && faction.isFriend(source))){
                 return TargetRelationEnum.FRIEND;
             }
         }
 
         //Enemy
-        for (Faction faction : factionMap.values()) {
+        for (Faction faction : factionList) {
             if ((faction.isMember(source) && faction.isEnemy(target)) || (faction.isMember(target) && faction.isEnemy(source)))
                 return TargetRelationEnum.ENEMY;
         }
@@ -190,7 +185,7 @@ public class Targeting {
      * @return Whether they are in the same faction or not
      */
     public static boolean checkIfSameFaction(Entity caster, Entity target){
-        for (Faction faction : factionMap.values()){
+        for (Faction faction : factionList){
             if (faction.isMember(target.getClass()) && faction.isMember(caster.getClass())) {
                 return true;
             }

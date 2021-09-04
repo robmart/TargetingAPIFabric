@@ -1,6 +1,7 @@
 package robmart.mod.targetingapifabric.common.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.EntityArgumentType;
@@ -19,7 +20,7 @@ public class CommandFaction {
                         .then(CommandManager.literal("add")
                                 .then(CommandManager.argument("faction", StringArgumentType.string())
                                         .suggests((ctx, builder) -> {
-                                            Targeting.getFactionMap().keySet().forEach(builder::suggest);
+                                            Targeting.getFactionList().forEach((faction -> builder.suggest(faction.getName())));
                                             return builder.buildFuture();
                                         })
                                         .then(CommandManager.argument("player", EntityArgumentType.players())
