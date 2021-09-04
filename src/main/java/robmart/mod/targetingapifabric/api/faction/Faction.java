@@ -256,13 +256,20 @@ public class Faction implements IFaction {
 
     @Override
     public void refreshPlayers() {
-        unprocessedData.forEach((key, value) -> {
+        Iterator<Map.Entry<String, UUID>> iterator = unprocessedData.entrySet().iterator();
+       while (iterator.hasNext()) {
+           Map.Entry<String, UUID> entry = iterator.next();
+           String key = entry.getKey();
+           UUID value = entry.getValue();
+
             if (key.contains("Member")) {
                 if (Reference.MINECRAFT_SERVER != null) {
 
                     Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null)
+                    if (entity != null) {
                         addMemberEntity(entity);
+                        iterator.remove();
+                    }
                 }
             }
 
@@ -270,8 +277,10 @@ public class Faction implements IFaction {
                 if (Reference.MINECRAFT_SERVER != null) {
 
                     Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null)
+                    if (entity != null) {
                         addFriendEntity(entity);
+                        iterator.remove();
+                    }
                 }
             }
 
@@ -279,11 +288,69 @@ public class Faction implements IFaction {
                 if (Reference.MINECRAFT_SERVER != null) {
 
                     Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null)
+                    if (entity != null) {
                         addEnemyEntity(entity);
+                        iterator.remove();
+                    }
                 }
             }
-        });
+        }
+    }
+
+    @Override
+    public void unloadEntity(Entity entity) {
+        if (memberEntities.contains(entity)) {
+            memberEntities.remove(entity);
+            int i = 0;
+            boolean saved = false;
+            if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
+                unprocessedData.put("UnprocessedMemberEntity" + i, entity.getUuid());
+                saved = true;
+            }
+            else {
+                while (unprocessedData.containsKey("UnprocessedMemberEntity" + i) && !saved) {
+                    i++;
+                    if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
+                        unprocessedData.put("UnprocessedMemberEntity" + i, entity.getUuid());
+                        saved = true;
+                    }
+                }
+            }
+        } else if (friendEntities.contains(entity)) {
+            friendEntities.remove(entity);
+            int i = 0;
+            boolean saved = false;
+            if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
+                unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
+                saved = true;
+            }
+            else {
+                while (unprocessedData.containsKey("UnprocessedFriendEntity" + i) && !saved) {
+                    i++;
+                    if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
+                        unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
+                        saved = true;
+                    }
+                }
+            }
+        } else if (enemyEntities.contains(entity)) {
+            enemyEntities.remove(entity);
+            int i = 0;
+            boolean saved = false;
+            if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
+                unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
+                saved = true;
+            }
+            else {
+                while (unprocessedData.containsKey("UnprocessedEnemyEntity" + i) && !saved) {
+                    i++;
+                    if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
+                        unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
+                        saved = true;
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -327,41 +394,46 @@ public class Faction implements IFaction {
         i = 0;
         while (tag.contains("MemberEntity" + i)) {
             if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedMemberEntity" + j, tag.getUuid("MemberEntity" + i));
+                unprocessedData.put("UnprocessedMemberEntity" + j++, tag.getUuid("MemberEntity" + i));
             } else {
-
                 Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("MemberEntity" + i));
-                if (entity != null)
+                if (entity != null) {
                     addMemberEntity(entity);
-
+                } else {
+                    unprocessedData.put("UnprocessedMemberEntity" + j++, tag.getUuid("MemberEntity" + i));
+                }
             }
             i++;
         }
 
         i = 0;
+        j = 0;
         while (tag.contains("FriendEntity" + i)) {
             if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedFriendEntity" + j, tag.getUuid("FriendEntity" + i));
+                unprocessedData.put("UnprocessedFriendEntity" + j++, tag.getUuid("FriendEntity" + i));
             } else {
-
                 Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("FriendEntity" + i));
-                if (entity != null)
+                if (entity != null) {
                     addFriendEntity(entity);
-
+                } else {
+                    unprocessedData.put("UnprocessedFriendEntity" + j++, tag.getUuid("FriendEntity" + i));
+                }
             }
             i++;
         }
 
         i = 0;
+        j = 0;
         while (tag.contains("EnemyEntity" + i)) {
             if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedEnemyEntity" + j, tag.getUuid("EnemyEntity" + i));
+                unprocessedData.put("UnprocessedEnemyEntity" + j++, tag.getUuid("EnemyEntity" + i));
             } else {
-
                 Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("EnemyEntity" + i));
-                if (entity != null)
+                if (entity != null) {
                     addEnemyEntity(entity);
-
+                } else {
+                    unprocessedData.put("UnprocessedEnemyEntity" + j++, tag.getUuid("EnemyEntity" + i));
+                }
             }
             i++;
         }
@@ -369,7 +441,8 @@ public class Faction implements IFaction {
 
     @Override
     public NbtCompound writeToNbt(NbtCompound compound) {
-        if (compound == null || !getIsPermanent()) return null;
+        if (compound == null) return null;
+        if (!getIsPermanent()) return compound;
 
         compound.putString("Class", this.getClass().getName());
         compound.putString("Name", getName());
