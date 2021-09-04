@@ -394,41 +394,46 @@ public class Faction implements IFaction {
         i = 0;
         while (tag.contains("MemberEntity" + i)) {
             if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedMemberEntity" + j, tag.getUuid("MemberEntity" + i));
+                unprocessedData.put("UnprocessedMemberEntity" + j++, tag.getUuid("MemberEntity" + i));
             } else {
-
                 Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("MemberEntity" + i));
-                if (entity != null)
+                if (entity != null) {
                     addMemberEntity(entity);
-
+                } else {
+                    unprocessedData.put("UnprocessedMemberEntity" + j++, tag.getUuid("MemberEntity" + i));
+                }
             }
             i++;
         }
 
         i = 0;
+        j = 0;
         while (tag.contains("FriendEntity" + i)) {
             if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedFriendEntity" + j, tag.getUuid("FriendEntity" + i));
+                unprocessedData.put("UnprocessedFriendEntity" + j++, tag.getUuid("FriendEntity" + i));
             } else {
-
                 Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("FriendEntity" + i));
-                if (entity != null)
+                if (entity != null) {
                     addFriendEntity(entity);
-
+                } else {
+                    unprocessedData.put("UnprocessedFriendEntity" + j++, tag.getUuid("FriendEntity" + i));
+                }
             }
             i++;
         }
 
         i = 0;
+        j = 0;
         while (tag.contains("EnemyEntity" + i)) {
             if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedEnemyEntity" + j, tag.getUuid("EnemyEntity" + i));
+                unprocessedData.put("UnprocessedEnemyEntity" + j++, tag.getUuid("EnemyEntity" + i));
             } else {
-
                 Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("EnemyEntity" + i));
-                if (entity != null)
+                if (entity != null) {
                     addEnemyEntity(entity);
-
+                } else {
+                    unprocessedData.put("UnprocessedEnemyEntity" + j++, tag.getUuid("EnemyEntity" + i));
+                }
             }
             i++;
         }
