@@ -319,26 +319,34 @@ public class Faction implements IFaction {
         } else if (friendEntities.contains(entity)) {
             friendEntities.remove(entity);
             int i = 0;
-            if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i))
+            boolean saved = false;
+            if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
                 unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
+                saved = true;
+            }
             else {
-                while (unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
+                while (unprocessedData.containsKey("UnprocessedFriendEntity" + i) && !saved) {
                     i++;
                     if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
                         unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
+                        saved = true;
                     }
                 }
             }
         } else if (enemyEntities.contains(entity)) {
             enemyEntities.remove(entity);
             int i = 0;
-            if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i))
+            boolean saved = false;
+            if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
                 unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
+                saved = true;
+            }
             else {
-                while (unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
+                while (unprocessedData.containsKey("UnprocessedEnemyEntity" + i) && !saved) {
                     i++;
                     if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
                         unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
+                        saved = true;
                     }
                 }
             }
