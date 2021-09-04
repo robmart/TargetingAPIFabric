@@ -256,13 +256,20 @@ public class Faction implements IFaction {
 
     @Override
     public void refreshPlayers() {
-        unprocessedData.forEach((key, value) -> {
+        Iterator<Map.Entry<String, UUID>> iterator = unprocessedData.entrySet().iterator();
+       while (iterator.hasNext()) {
+           Map.Entry<String, UUID> entry = iterator.next();
+           String key = entry.getKey();
+           UUID value = entry.getValue();
+
             if (key.contains("Member")) {
                 if (Reference.MINECRAFT_SERVER != null) {
 
                     Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null)
+                    if (entity != null) {
                         addMemberEntity(entity);
+                        iterator.remove();
+                    }
                 }
             }
 
@@ -270,8 +277,10 @@ public class Faction implements IFaction {
                 if (Reference.MINECRAFT_SERVER != null) {
 
                     Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null)
+                    if (entity != null) {
                         addFriendEntity(entity);
+                        iterator.remove();
+                    }
                 }
             }
 
@@ -279,11 +288,13 @@ public class Faction implements IFaction {
                 if (Reference.MINECRAFT_SERVER != null) {
 
                     Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null)
+                    if (entity != null) {
                         addEnemyEntity(entity);
+                        iterator.remove();
+                    }
                 }
             }
-        });
+        }
     }
 
     @Override
