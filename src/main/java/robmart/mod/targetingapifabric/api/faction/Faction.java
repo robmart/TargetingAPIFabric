@@ -287,6 +287,54 @@ public class Faction implements IFaction {
     }
 
     @Override
+    public void unloadEntity(Entity entity) {
+        if (memberEntities.contains(entity)) {
+            memberEntities.remove(entity);
+            int i = 0;
+            boolean saved = false;
+            if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
+                unprocessedData.put("UnprocessedMemberEntity" + i, entity.getUuid());
+                saved = true;
+            }
+            else {
+                while (unprocessedData.containsKey("UnprocessedMemberEntity" + i) && !saved) {
+                    i++;
+                    if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
+                        unprocessedData.put("UnprocessedMemberEntity" + i, entity.getUuid());
+                        saved = true;
+                    }
+                }
+            }
+        } else if (friendEntities.contains(entity)) {
+            friendEntities.remove(entity);
+            int i = 0;
+            if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i))
+                unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
+            else {
+                while (unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
+                    i++;
+                    if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
+                        unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
+                    }
+                }
+            }
+        } else if (enemyEntities.contains(entity)) {
+            enemyEntities.remove(entity);
+            int i = 0;
+            if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i))
+                unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
+            else {
+                while (unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
+                    i++;
+                    if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
+                        unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
     public void readFromNbt(NbtCompound tag) {
         //Classes
         int i = 0;
@@ -369,7 +417,8 @@ public class Faction implements IFaction {
 
     @Override
     public NbtCompound writeToNbt(NbtCompound compound) {
-        if (compound == null || !getIsPermanent()) return null;
+        if (compound == null) return null;
+        if (!getIsPermanent()) return compound;
 
         compound.putString("Class", this.getClass().getName());
         compound.putString("Name", getName());
