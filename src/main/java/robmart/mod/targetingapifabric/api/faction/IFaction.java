@@ -54,6 +54,7 @@ public interface IFaction {
     boolean isEnemy(Class<? extends Entity> potentialEnemy);
     boolean isEnemy(Entity potentialEnemy);
     void refreshPlayers();
+    void unloadEntity(Entity entity);
     void readFromNbt(NbtCompound nbt);
     NbtCompound writeToNbt(NbtCompound nbt);
 }
