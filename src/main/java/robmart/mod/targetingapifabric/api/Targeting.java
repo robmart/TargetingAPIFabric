@@ -247,4 +247,14 @@ public class Targeting {
 
         return false;
     }
+
+    /**
+     * Check if caster has any relation to target
+     * @param caster Caster
+     * @param target Target
+     * @return Whether they have any relation for not
+     */
+    public static boolean hasRelation(Entity caster, Entity target) {
+        return isFriendly(caster, target) || isSameTeam(caster, target) || isValidEnemy(caster, target);
+    }
 }

@@ -16,7 +16,7 @@ public class TargetingAPIFabric implements ModInitializer {
     public void onInitialize() {
         ServerLifecycleEvents.SERVER_STARTING.register((server -> {
             Reference.MINECRAFT_SERVER = server;
-            Faction animals = new Faction("FarmAnimals", true);
+            Faction animals = new Faction("FarmAnimals", false);
             animals.addFriendClass(PlayerEntity.class);
             animals.addMemberClass(CowEntity.class);
             animals.addMemberClass(SheepEntity.class);
@@ -44,6 +44,10 @@ public class TargetingAPIFabric implements ModInitializer {
             if (entity instanceof PlayerEntity) {
                 Targeting.getFactionMap().values().forEach(Faction::refreshPlayers);
             }
+        }));
+
+        ServerEntityEvents.ENTITY_UNLOAD.register(((entity, world) -> {
+            Targeting.getFactionMap().values().forEach(faction -> faction.unloadEntity(entity));
         }));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> CommandFaction.register(dispatcher));
