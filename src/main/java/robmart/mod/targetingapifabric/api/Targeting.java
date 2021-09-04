@@ -163,7 +163,7 @@ public class Targeting {
         }
 
         //Same faction
-        if (checkIfSameFaction(source, target))
+        if (checkIfSameFaction(source, target) || isSameTeam(source, target))
             return TargetRelationEnum.FRIEND;
 
         // Friends
