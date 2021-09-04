@@ -22,6 +22,7 @@ package robmart.mod.targetingapifabric.api;
 public enum TargetType {
     ALL,
     ENEMY,
+    NEUTRAL,
     FRIENDLY,
     PLAYERS,
     SELF,

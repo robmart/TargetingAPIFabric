@@ -12,7 +12,6 @@ import java.util.*;
  * Remade by Robmart on 1/30/2020
  */
 public class Faction implements IFaction {
-    private final String name;
     private final boolean isPermanent;
 
     private final List<Class<? extends Entity>> memberClasses = new ArrayList<>();
@@ -23,6 +22,8 @@ public class Faction implements IFaction {
     private final List<Entity> enemyEntities = new ArrayList<>();
 
     private final Map<String, UUID> unprocessedData = new HashMap<>();
+
+    private String name;
 
     public Faction(String name) {
         this(name, true);
@@ -37,6 +38,11 @@ public class Faction implements IFaction {
     @Override
     public String getName() {
         return this.name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
     }
 
     @Override

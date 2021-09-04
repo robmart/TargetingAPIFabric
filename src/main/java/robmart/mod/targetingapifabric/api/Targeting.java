@@ -6,12 +6,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.scoreboard.Team;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class Targeting {
 
@@ -95,26 +98,21 @@ public class Targeting {
             return false;
 
         // Ignore spectators
-        if (target instanceof PlayerEntity && ((PlayerEntity) target).isSpectator())
+        if (target instanceof PlayerEntity && target.isSpectator())
             return false;
 
         // Ignore Creative Mode players
         if (target instanceof PlayerEntity && ((PlayerEntity) target).isCreative())
             return false;
 
-        switch (type) {
-            case ALL:
-                return true;
-            case SELF:
-                return caster.equals(target);
-            case PLAYERS:
-                return target instanceof PlayerEntity;
-            case FRIENDLY:
-                return isFriendly(caster, target);
-            case ENEMY:
-                return isValidEnemy(caster, target);
-        }
-        return false;
+        return switch (type) {
+            case ALL -> true;
+            case SELF -> caster.equals(target);
+            case PLAYERS -> target instanceof PlayerEntity;
+            case FRIENDLY -> getTargetRelation(caster, target) == TargetRelationEnum.FRIEND;
+            case ENEMY -> getTargetRelation(caster, target) == TargetRelationEnum.ENEMY;
+            case NEUTRAL -> getTargetRelation(caster, target) == TargetRelationEnum.NEUTRAL;
+        };
     }
 
     /**
@@ -129,81 +127,60 @@ public class Targeting {
         return myTeam != null && otherTeam != null && myTeam.isEqual(otherTeam);
     }
 
-    /**
-     * Check if two players are friendly
-     * @param caster Player one
-     * @param target Player two
-     * @return If the two players are friendly
-     */
-    public static boolean isFriendlyPlayer(Entity caster, Entity target) {
-        if (caster.equals(target)) return true;
-        if (isSameTeam(caster, target)) return true;
-        return checkIfSameFaction(caster, target);
-    }
-
-    /**
-     * Checks if the rideable/ownable entity is owned
-     * @param target The rideable/ownable entity
-     * @return Whether the rideable/ownable entity is owned
-     */
-    public static boolean isPlayerControlled(Entity target) {
-        Entity controller = target.getPrimaryPassenger();
-        if (controller instanceof PlayerEntity) {
-            return true;
-        }
-        if (target instanceof TameableEntity) {
-            TameableEntity ownable = (TameableEntity) target;
-            // Entity is owned, but the owner is offline
-            // If the owner if offline then there's not much we can do.
-            // Returning false for right now due to Lycanites AI quirks
-            return ownable.getOwnerUuid() != null;
-        }
-        return false;
-    }
-
-    /**
-     * Checks if rideable/ownable entity is friendly with rider
-     * @param caster The rider/owner
-     * @param target The rideable/ownable entity
-     * @return Whether rideable/ownable entity is friendly with rider
-     */
-    public static boolean isFriendlyPlayerControlled(Entity caster, Entity target) {
-        Entity controller = target.getPrimaryPassenger();
-        if (controller instanceof PlayerEntity) {
-            return isFriendly(caster, controller);
+    private static Entity getRootEntity(Entity source) {
+        Entity controller = source.getPrimaryPassenger();
+        if (controller != null) {
+            return getRootEntity(controller);
         }
 
-        if (target instanceof TameableEntity) {
-            TameableEntity ownable = (TameableEntity) target;
-
-            Entity owner = ownable.getOwner();
+        if (source instanceof TameableEntity) {
+            TameableEntity owned = (TameableEntity) source;
+            Entity owner = owned.getOwner();
             if (owner != null) {
-                // Owner is online, perform the normal checks
-                return isFriendly(caster, owner);
-            } else if (ownable.getOwnerUuid() != null) {
+                // Owner is online, so use it for relationship checks
+                return getRootEntity(owner);
+            } else if (owned.getOwner() != null) {
                 // Entity is owned, but the owner is offline
                 // If the owner if offline then there's not much we can do.
-                // Returning false for right now due to Lycanites AI quirks
-                return false;
+                return source;
             }
         }
 
-        return false;
+        return source;
     }
 
-    /**
-     * Check whether caster's faction is friends with target
-     * @param caster The member of the faction
-     * @param target The target being evaluated
-     * @return Whether caster's faction is friends with target
-     */
-    public static boolean checkFactionFriends(Entity caster, Entity target){
+    public static boolean areEntitiesEqual(Entity first, Entity second) {
+        return first != null && second != null && first.getUuid().compareTo(second.getUuid()) == 0;
+    }
+
+    public static TargetRelationEnum getTargetRelation(Entity source, Entity target) {
+        // can't be enemy with self
+        if (areEntitiesEqual(source, target)) {
+            return TargetRelationEnum.FRIEND;
+        }
+
+        if (!EntityPredicates.VALID_LIVING_ENTITY.test(target)) {
+            return TargetRelationEnum.UNHANDLED;
+        }
+
+        //Same faction
+        if (checkIfSameFaction(source, target) || isSameTeam(source, target))
+            return TargetRelationEnum.FRIEND;
+
+        // Friends
         for (Faction faction : factionMap.values()){
-            if ((faction.isMember(caster) && faction.isFriend(target)) || (faction.isMember(target) && faction.isFriend(caster))){
-                return true;
+            if ((faction.isMember(source) && faction.isFriend(target)) || (faction.isMember(target) && faction.isFriend(source))){
+                return TargetRelationEnum.FRIEND;
             }
         }
-        return false;
+
+        //Enemy
+        for (Faction faction : factionMap.values()) {
+            if ((faction.isMember(source) && faction.isEnemy(target)) || (faction.isMember(target) && faction.isEnemy(source)))
+                return TargetRelationEnum.ENEMY;
+        }
+
+        return TargetRelationEnum.NEUTRAL;
     }
 
     /**
@@ -221,31 +198,30 @@ public class Targeting {
         return false;
     }
 
-    /**
-     * Check if two caster is friends with target
-     * @param caster Caster
-     * @param target Target
-     * @return Whether they are friendly or not
-     */
-    public static boolean isFriendly(Entity caster, Entity target) {
-        if (checkIfSameFaction(caster, target)) return true;
-        return checkFactionFriends(caster, target);
+
+    static boolean validCheck(Entity caster, Entity target, EnumSet<TargetRelationEnum> relations) {
+        Entity casterRoot = getRootEntity(caster);
+        Entity targetRoot = getRootEntity(target);
+
+        TargetRelationEnum relation = getTargetRelation(casterRoot, targetRoot);
+        return relations.contains(relation);
     }
 
-    /**
-     * Check if the target is enemy of caster
-     * @param caster Caster
-     * @param target Target
-     * @return Whether they are enemies or not
-     */
-    public static boolean isValidEnemy(Entity caster, Entity target) {
-        if (isFriendly(caster, target)) return false;
-        for (Faction faction : factionMap.values()) {
-            if ((faction.isMember(caster) && faction.isEnemy(target)) || (faction.isMember(target) && faction.isEnemy(caster)))
-                return true;
-        }
+    @Deprecated
+    public static boolean isFriendly(Entity caster, Entity target) {
+        return isValidFriendly(caster, target);
+    }
 
-        return false;
+    public static boolean isValidFriendly(Entity caster, Entity target) {
+        return validCheck(caster, target, EnumSet.of(TargetRelationEnum.FRIEND));
+    }
+
+    public static boolean isValidEnemy(Entity caster, Entity target) {
+        return validCheck(caster, target, EnumSet.of(TargetRelationEnum.ENEMY));
+    }
+
+    public static boolean isValidNeutral(Entity caster, Entity target) {
+        return validCheck(caster, target, EnumSet.of(TargetRelationEnum.NEUTRAL, TargetRelationEnum.UNHANDLED));
     }
 
     /**
@@ -255,6 +231,6 @@ public class Targeting {
      * @return Whether they have any relation for not
      */
     public static boolean hasRelation(Entity caster, Entity target) {
-        return isFriendly(caster, target) || isSameTeam(caster, target) || isValidEnemy(caster, target);
+        return !isValidNeutral(caster, target);
     }
 }
