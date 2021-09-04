@@ -2,7 +2,6 @@ package robmart.mod.targetingapifabric.api.faction.manager;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.WorldProperties;
-import net.minecraft.world.level.LevelProperties;
 import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 
@@ -30,6 +29,6 @@ public class FactionManager implements IFactionManager {
 
     @Override
     public void writeToNbt(NbtCompound tag) {
-        Targeting.getFactionMap().forEach((s, faction) -> tag.put(s, faction.writeToNbt(new NbtCompound())));
+        Targeting.getFactionList().forEach((faction) -> tag.put(faction.getName(), faction.writeToNbt(new NbtCompound())));
     }
 }

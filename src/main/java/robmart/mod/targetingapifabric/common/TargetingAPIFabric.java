@@ -42,12 +42,12 @@ public class TargetingAPIFabric implements ModInitializer {
 
         ServerEntityEvents.ENTITY_LOAD.register(((entity, world) -> {
             if (entity instanceof PlayerEntity) {
-                Targeting.getFactionMap().values().forEach(Faction::refreshPlayers);
+                Targeting.getFactionList().forEach(Faction::refreshPlayers);
             }
         }));
 
         ServerEntityEvents.ENTITY_UNLOAD.register(((entity, world) -> {
-            Targeting.getFactionMap().values().forEach(faction -> faction.unloadEntity(entity));
+            Targeting.getFactionList().forEach(faction -> faction.unloadEntity(entity));
         }));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> CommandFaction.register(dispatcher));
