@@ -11,6 +11,7 @@ import net.minecraft.scoreboard.Team;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.BiFunction;
@@ -197,6 +198,32 @@ public class Targeting {
         return false;
     }
 
+
+    static boolean validCheck(Entity caster, Entity target, EnumSet<TargetRelationEnum> relations) {
+        Entity casterRoot = getRootEntity(caster);
+        Entity targetRoot = getRootEntity(target);
+
+        TargetRelationEnum relation = getTargetRelation(casterRoot, targetRoot);
+        return relations.contains(relation);
+    }
+
+    @Deprecated
+    public static boolean isFriendly(Entity caster, Entity target) {
+        return isValidFriendly(caster, target);
+    }
+
+    public static boolean isValidFriendly(Entity caster, Entity target) {
+        return validCheck(caster, target, EnumSet.of(TargetRelationEnum.FRIEND));
+    }
+
+    public static boolean isValidEnemy(Entity caster, Entity target) {
+        return validCheck(caster, target, EnumSet.of(TargetRelationEnum.ENEMY));
+    }
+
+    public static boolean isValidNeutral(Entity caster, Entity target) {
+        return validCheck(caster, target, EnumSet.of(TargetRelationEnum.NEUTRAL, TargetRelationEnum.UNHANDLED));
+    }
+
     /**
      * Check if caster has any relation to target
      * @param caster Caster
@@ -204,6 +231,6 @@ public class Targeting {
      * @return Whether they have any relation for not
      */
     public static boolean hasRelation(Entity caster, Entity target) {
-        return getTargetRelation(caster, target) != TargetRelationEnum.UNHANDLED && getTargetRelation(caster, target) != TargetRelationEnum.NEUTRAL;
+        return !isValidNeutral(caster, target);
     }
 }
