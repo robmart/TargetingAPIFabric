@@ -8,7 +8,9 @@ import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.LiteralTextContent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.TextContent;
 import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 
@@ -35,7 +37,7 @@ public class CommandFaction {
     }
 
     private static int listFactions(ServerCommandSource  source, PlayerEntity entity) {
-        source.sendFeedback(new LiteralText(Targeting.getFactionsFromEntity(entity).toString()), true);
+        source.sendFeedback(MutableText.of(new LiteralTextContent(Targeting.getFactionsFromEntity(entity).toString())), true);
         return 1;
     }
 

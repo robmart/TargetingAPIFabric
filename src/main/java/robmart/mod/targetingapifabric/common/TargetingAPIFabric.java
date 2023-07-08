@@ -1,7 +1,7 @@
 package robmart.mod.targetingapifabric.common;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.passive.*;
@@ -33,6 +33,23 @@ public class TargetingAPIFabric implements ModInitializer {
             animals.addMemberClass(SquidEntity.class);
             animals.addMemberClass(MooshroomEntity.class);
             Targeting.registerFaction(animals);
+            Faction animals2 = new Faction("FarmAnimals2", true);
+            animals2.addFriendClass(PlayerEntity.class);
+            animals2.addMemberClass(CowEntity.class);
+            animals2.addMemberClass(SheepEntity.class);
+            animals2.addMemberClass(ChickenEntity.class);
+            animals2.addMemberClass(HorseEntity.class);
+            animals2.addMemberClass(LlamaEntity.class);
+            animals2.addMemberClass(DonkeyEntity.class);
+            animals2.addMemberClass(MuleEntity.class);
+            animals2.addMemberClass(PigEntity.class);
+            animals2.addMemberClass(ParrotEntity.class);
+            animals2.addMemberClass(RabbitEntity.class);
+            animals2.addMemberClass(OcelotEntity.class);
+            animals2.addMemberClass(WolfEntity.class);
+            animals2.addMemberClass(SquidEntity.class);
+            animals2.addMemberClass(MooshroomEntity.class);
+            Targeting.registerFaction(animals2);
         }));
 
         ServerLifecycleEvents.SERVER_STOPPED.register((server -> {
@@ -50,6 +67,6 @@ public class TargetingAPIFabric implements ModInitializer {
             Targeting.getFactionList().forEach(faction -> faction.unloadEntity(entity));
         }));
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> CommandFaction.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CommandFaction.register(dispatcher));
     }
 }
