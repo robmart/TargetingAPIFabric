@@ -1,7 +1,7 @@
 package robmart.mod.targetingapifabric.common;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.passive.*;
@@ -50,6 +50,6 @@ public class TargetingAPIFabric implements ModInitializer {
             Targeting.getFactionList().forEach(faction -> faction.unloadEntity(entity));
         }));
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) -> CommandFaction.register(dispatcher));
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CommandFaction.register(dispatcher));
     }
 }

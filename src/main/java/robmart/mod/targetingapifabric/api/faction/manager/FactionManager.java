@@ -29,6 +29,9 @@ public class FactionManager implements IFactionManager {
 
     @Override
     public void writeToNbt(NbtCompound tag) {
-        Targeting.getFactionList().forEach((faction) -> tag.put(faction.getName(), faction.writeToNbt(new NbtCompound())));
+        Targeting.getFactionList().forEach((faction) -> {
+            if (faction.getIsPermanent())
+                tag.put(faction.getName(), faction.writeToNbt(new NbtCompound()));
+        });
     }
 }
