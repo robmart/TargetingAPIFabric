@@ -33,12 +33,13 @@ public class Targeting {
      * Register a new faction
      * @param newFaction The faction that should be registered
      */
-    public static void registerFaction(Faction newFaction){
+    public static boolean registerFaction(Faction newFaction){
         for (Faction faction : factionList) {
             if (faction.getName().equals(newFaction.getName()))
-                return;
+                return false;
         }
         factionList.add(newFaction);
+        return true;
     }
 
     /**
@@ -46,7 +47,9 @@ public class Targeting {
      * @param faction The faction that should be removed
      */
     public static void disbandFaction(Faction faction){
-        factionList.removeIf(faction1 -> faction == faction1);
+        if (factionList.removeIf(faction1 -> faction == faction1)) {
+            faction.onDisband();
+        }
     }
 
     /**
