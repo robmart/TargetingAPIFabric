@@ -43,10 +43,12 @@ public class Faction implements IFaction {
 
     @Override
     public boolean setName(String name) {
-        if (Targeting.getFaction(name) == null) return false;
-
-        this.name = name;
-        return true;
+        if (Targeting.getFaction(name) != null)
+            return false;
+        else {
+            this.name = name;
+            return true;
+        }
     }
 
     @Override
