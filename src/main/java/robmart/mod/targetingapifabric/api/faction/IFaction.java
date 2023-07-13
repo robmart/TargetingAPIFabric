@@ -28,7 +28,7 @@ import java.util.Set;
 public interface IFaction {
 
     String getName();
-    void setName(String name);
+    boolean setName(String name);
     boolean getIsPermanent();
     void addFriendClass(Class<? extends Entity> classToAdd);
     void addFriendEntity(Entity entityToAdd);

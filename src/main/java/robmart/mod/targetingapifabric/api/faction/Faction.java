@@ -3,6 +3,7 @@ package robmart.mod.targetingapifabric.api.faction;
 import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
+import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
@@ -41,8 +42,11 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public void setName(String name) {
+    public boolean setName(String name) {
+        if (Targeting.getFaction(name) == null) return false;
+
         this.name = name;
+        return true;
     }
 
     @Override
