@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 import robmart.mod.targetingapifabric.api.Targeting;
-import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
 

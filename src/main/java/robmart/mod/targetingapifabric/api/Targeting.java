@@ -16,7 +16,7 @@ public class Targeting {
     private static final List<Faction> factionList = new ArrayList<>();
 
     /**
-     * Gets an immutable shallow copy of the faction map
+     * Gets an immutable shallow copy of the faction list
      */
     public static ImmutableList<Faction> getFactionList() {
         return ImmutableList.copyOf(factionList);
@@ -194,6 +194,21 @@ public class Targeting {
             }
         }
         return false;
+    }
+
+    /**
+     * If the two entities are part of the same faction, return that faction
+     * @param caster Entity one
+     * @param target Entity two
+     * @return If they are part of the same faction, return it, otherwise returns null
+     */
+    public static Faction returnSameFaction(Entity caster, Entity target){
+        for (Faction faction : factionList){
+            if (faction.isMember(target.getClass()) && faction.isMember(caster.getClass())) {
+                return faction;
+            }
+        }
+        return null;
     }
 
 
