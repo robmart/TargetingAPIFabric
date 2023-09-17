@@ -4,8 +4,10 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.entity.mob.ZoglinEntity;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.command.TeamCommand;
 import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 import robmart.mod.targetingapifabric.api.reference.Reference;
@@ -38,16 +40,6 @@ public class TargetingAPIFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register((server -> {
             Targeting.clearFactions();
             Reference.MINECRAFT_SERVER = null;
-        }));
-
-        ServerEntityEvents.ENTITY_LOAD.register(((entity, world) -> {
-            if (entity instanceof PlayerEntity) {
-                Targeting.getFactionList().forEach(Faction::refreshPlayers);
-            }
-        }));
-
-        ServerEntityEvents.ENTITY_UNLOAD.register(((entity, world) -> {
-            Targeting.getFactionList().forEach(faction -> faction.unloadEntity(entity));
         }));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CommandFaction.register(dispatcher));

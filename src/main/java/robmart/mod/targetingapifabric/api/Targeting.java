@@ -16,7 +16,7 @@ public class Targeting {
     private static final List<Faction> factionList = new ArrayList<>();
 
     /**
-     * Gets an immutable shallow copy of the faction map
+     * Gets an immutable shallow copy of the faction list
      */
     public static ImmutableList<Faction> getFactionList() {
         return ImmutableList.copyOf(factionList);
@@ -33,12 +33,13 @@ public class Targeting {
      * Register a new faction
      * @param newFaction The faction that should be registered
      */
-    public static void registerFaction(Faction newFaction){
+    public static boolean registerFaction(Faction newFaction){
         for (Faction faction : factionList) {
             if (faction.getName().equals(newFaction.getName()))
-                return;
+                return false;
         }
         factionList.add(newFaction);
+        return true;
     }
 
     /**
@@ -46,7 +47,9 @@ public class Targeting {
      * @param faction The faction that should be removed
      */
     public static void disbandFaction(Faction faction){
-        factionList.removeIf(faction1 -> faction == faction1);
+        if (factionList.removeIf(faction1 -> faction == faction1)) {
+            faction.onDisband();
+        }
     }
 
     /**
@@ -191,6 +194,21 @@ public class Targeting {
             }
         }
         return false;
+    }
+
+    /**
+     * If the two entities are part of the same faction, return that faction
+     * @param caster Entity one
+     * @param target Entity two
+     * @return If they are part of the same faction, return it, otherwise returns null
+     */
+    public static Faction returnSameFaction(Entity caster, Entity target){
+        for (Faction faction : factionList){
+            if (faction.isMember(target.getClass()) && faction.isMember(caster.getClass())) {
+                return faction;
+            }
+        }
+        return null;
     }
 
 

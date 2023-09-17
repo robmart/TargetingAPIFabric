@@ -28,7 +28,7 @@ import java.util.Set;
 public interface IFaction {
 
     String getName();
-    void setName(String name);
+    boolean setName(String name);
     boolean getIsPermanent();
     void addFriendClass(Class<? extends Entity> classToAdd);
     void addFriendEntity(Entity entityToAdd);
@@ -54,8 +54,7 @@ public interface IFaction {
     boolean isFriend(Entity potentialFriend);
     boolean isEnemy(Class<? extends Entity> potentialEnemy);
     boolean isEnemy(Entity potentialEnemy);
-    void refreshPlayers();
-    void unloadEntity(Entity entity);
+    void onDisband();
     void readFromNbt(NbtCompound nbt);
     NbtCompound writeToNbt(NbtCompound nbt);
 }
