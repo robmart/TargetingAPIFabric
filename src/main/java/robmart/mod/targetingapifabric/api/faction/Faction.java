@@ -18,11 +18,9 @@ public class Faction implements IFaction {
     private final List<Class<? extends Entity>> memberClasses = new ArrayList<>();
     private final List<Class<? extends Entity>> friendClasses = new ArrayList<>();
     private final List<Class<? extends Entity>> enemyClasses = new ArrayList<>();
-    private final List<Entity> memberEntities = new ArrayList<>();
-    private final List<Entity> friendEntities = new ArrayList<>();
-    private final List<Entity> enemyEntities = new ArrayList<>();
-
-    private final Map<String, UUID> unprocessedData = new HashMap<>();
+    private final List<String> memberEntities = new ArrayList<>();
+    private final List<String> friendEntities = new ArrayList<>();
+    private final List<String> enemyEntities = new ArrayList<>();
 
     private String name;
 
@@ -67,7 +65,7 @@ public class Faction implements IFaction {
     @Override
     public void addFriendEntity(Entity entityToAdd) {
         if (!isFriend(entityToAdd))
-            this.friendEntities.add(entityToAdd);
+            this.friendEntities.add(entityToAdd.getEntityName());
 
 
     }
@@ -83,7 +81,7 @@ public class Faction implements IFaction {
     @Override
     public void removeFriendEntity(Entity entityToRemove) {
         if (isFriend(entityToRemove))
-            this.friendEntities.remove(entityToRemove);
+            this.friendEntities.remove(entityToRemove.getEntityName());
 
 
     }
@@ -99,7 +97,7 @@ public class Faction implements IFaction {
     @Override
     public void addMemberEntity(Entity entityToAdd){
         if (!isMember(entityToAdd))
-            this.memberEntities.add(entityToAdd);
+            this.memberEntities.add(entityToAdd.getEntityName());
 
 
     }
@@ -115,7 +113,7 @@ public class Faction implements IFaction {
     @Override
     public void removeMemberEntity(Entity entityToRemove) {
         if (isMember(entityToRemove))
-            this.memberEntities.remove(entityToRemove);
+            this.memberEntities.remove(entityToRemove.getEntityName());
 
 
     }
@@ -131,7 +129,7 @@ public class Faction implements IFaction {
     @Override
     public void addEnemyEntity(Entity entityToAdd) {
         if (!isEnemy(entityToAdd))
-            this.enemyEntities.add(entityToAdd);
+            this.enemyEntities.add(entityToAdd.getEntityName());
 
 
     }
@@ -147,7 +145,7 @@ public class Faction implements IFaction {
     @Override
     public void removeEnemyEntity(Entity entityToRemove) {
         if (isEnemy(entityToRemove))
-            this.enemyEntities.remove(entityToRemove);
+            this.enemyEntities.remove(entityToRemove.getEntityName());
 
 
     }
@@ -215,8 +213,8 @@ public class Faction implements IFaction {
     public boolean isMember(Entity potentialMember){
         if (potentialMember == null) return false;
         if (isMember(potentialMember.getClass())) return true;
-        for (Entity entity : this.memberEntities) {
-            if (entity.equals(potentialMember)) return true;
+        for (String entity : this.memberEntities) {
+            if (entity.equals(potentialMember.getEntityName())) return true;
         }
 
         return false;
@@ -237,8 +235,8 @@ public class Faction implements IFaction {
     public boolean isFriend(Entity potentialFriend){
         if (potentialFriend == null) return false;
         if (isFriend(potentialFriend.getClass())) return true;
-        for (Entity entity : this.friendEntities) {
-            if (entity.equals(potentialFriend)) return true;
+        for (String entity : this.friendEntities) {
+            if (entity.equals(potentialFriend.getEntityName())) return true;
         }
 
         return false;
@@ -259,110 +257,11 @@ public class Faction implements IFaction {
     public boolean isEnemy(Entity potentialEnemy){
         if (potentialEnemy == null) return false;
         if (isFriend(potentialEnemy.getClass())) return true;
-        for (Entity entity : this.enemyEntities) {
-            if (entity.equals(potentialEnemy)) return true;
+        for (String entity : this.enemyEntities) {
+            if (entity.equals(potentialEnemy.getEntityName())) return true;
         }
 
         return false;
-    }
-
-    @Override
-    public void refreshPlayers() {
-        Iterator<Map.Entry<String, UUID>> iterator = unprocessedData.entrySet().iterator();
-       while (iterator.hasNext()) {
-           Map.Entry<String, UUID> entry = iterator.next();
-           String key = entry.getKey();
-           UUID value = entry.getValue();
-
-            if (key.contains("Member")) {
-                if (Reference.MINECRAFT_SERVER != null) {
-
-                    Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null) {
-                        addMemberEntity(entity);
-                        iterator.remove();
-                    }
-                }
-            }
-
-            if (key.contains("Friend")) {
-                if (Reference.MINECRAFT_SERVER != null) {
-
-                    Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null) {
-                        addFriendEntity(entity);
-                        iterator.remove();
-                    }
-                }
-            }
-
-            if (key.contains("Enemy")) {
-                if (Reference.MINECRAFT_SERVER != null) {
-
-                    Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(value);
-                    if (entity != null) {
-                        addEnemyEntity(entity);
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-    }
-
-    @Override
-    public void unloadEntity(Entity entity) {
-        if (memberEntities.contains(entity)) {
-            removeMemberEntity(entity);
-            int i = 0;
-            boolean saved = false;
-            if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
-                unprocessedData.put("UnprocessedMemberEntity" + i, entity.getUuid());
-                saved = true;
-            }
-            else {
-                while (unprocessedData.containsKey("UnprocessedMemberEntity" + i) && !saved) {
-                    i++;
-                    if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
-                        unprocessedData.put("UnprocessedMemberEntity" + i, entity.getUuid());
-                        saved = true;
-                    }
-                }
-            }
-        } else if (friendEntities.contains(entity)) {
-            removeFriendEntity(entity);
-            int i = 0;
-            boolean saved = false;
-            if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
-                unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
-                saved = true;
-            }
-            else {
-                while (unprocessedData.containsKey("UnprocessedFriendEntity" + i) && !saved) {
-                    i++;
-                    if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
-                        unprocessedData.put("UnprocessedFriendEntity" + i, entity.getUuid());
-                        saved = true;
-                    }
-                }
-            }
-        } else if (enemyEntities.contains(entity)) {
-            removeEnemyEntity(entity);
-            int i = 0;
-            boolean saved = false;
-            if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
-                unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
-                saved = true;
-            }
-            else {
-                while (unprocessedData.containsKey("UnprocessedEnemyEntity" + i) && !saved) {
-                    i++;
-                    if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
-                        unprocessedData.put("UnprocessedEnemyEntity" + i, entity.getUuid());
-                        saved = true;
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -407,51 +306,21 @@ public class Faction implements IFaction {
         }
 
         //Entities
-        int j = 0;
         i = 0;
         while (tag.contains("MemberEntity" + i)) {
-            if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedMemberEntity" + j++, tag.getUuid("MemberEntity" + i));
-            } else {
-                Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("MemberEntity" + i));
-                if (entity != null) {
-                    addMemberEntity(entity);
-                } else {
-                    unprocessedData.put("UnprocessedMemberEntity" + j++, tag.getUuid("MemberEntity" + i));
-                }
-            }
+            memberEntities.add(tag.getString("MemberEntity" + i));
             i++;
         }
 
         i = 0;
-        j = 0;
         while (tag.contains("FriendEntity" + i)) {
-            if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedFriendEntity" + j++, tag.getUuid("FriendEntity" + i));
-            } else {
-                Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("FriendEntity" + i));
-                if (entity != null) {
-                    addFriendEntity(entity);
-                } else {
-                    unprocessedData.put("UnprocessedFriendEntity" + j++, tag.getUuid("FriendEntity" + i));
-                }
-            }
+            memberEntities.add(tag.getString("FriendEntity" + i));
             i++;
         }
 
         i = 0;
-        j = 0;
         while (tag.contains("EnemyEntity" + i)) {
-            if (Reference.MINECRAFT_SERVER == null || Reference.MINECRAFT_SERVER.isLoading()) {
-                unprocessedData.put("UnprocessedEnemyEntity" + j++, tag.getUuid("EnemyEntity" + i));
-            } else {
-                Entity entity = Reference.MINECRAFT_SERVER.getOverworld().getEntity(tag.getUuid("EnemyEntity" + i));
-                if (entity != null) {
-                    addEnemyEntity(entity);
-                } else {
-                    unprocessedData.put("UnprocessedEnemyEntity" + j++, tag.getUuid("EnemyEntity" + i));
-                }
-            }
+            memberEntities.add(tag.getString("EnemyEntity" + i));
             i++;
         }
     }
@@ -468,36 +337,9 @@ public class Faction implements IFaction {
         friendClasses.forEach(fclass -> compound.putString("FriendClass" + friendClasses.indexOf(fclass), fclass.getName()));
         enemyClasses.forEach(eclass -> compound.putString("EnemyClass" + enemyClasses.indexOf(eclass), eclass.getName()));
 
-        memberEntities.forEach(mentity -> compound.putUuid("MemberEntity" + memberEntities.indexOf(mentity), mentity.getUuid()));
-        friendEntities.forEach(fentity -> compound.putUuid("FriendEntity" + friendEntities.indexOf(fentity), fentity.getUuid()));
-        enemyEntities.forEach(eentity -> compound.putUuid("EnemyEntity" + enemyEntities.indexOf(eentity), eentity.getUuid()));
-
-        unprocessedData.forEach((key, value) -> {
-            int i = 0;
-            if (key.contains("Member")) {
-                while (compound.contains("MemberEntity" + i)) {
-                    i++;
-                }
-
-                compound.putUuid("MemberEntity" + i, value);
-            }
-
-            if (key.contains("Friend")) {
-                while (compound.contains("FriendEntity" + i)) {
-                    i++;
-                }
-
-                compound.putUuid("FriendEntity" + i, value);
-            }
-
-            if (key.contains("Enemy")) {
-                while (compound.contains("EnemyEntity" + i)) {
-                    i++;
-                }
-
-                compound.putUuid("EnemyEntity" + i, value);
-            }
-        });
+        memberEntities.forEach(mentity -> compound.putString("MemberEntity" + memberEntities.indexOf(mentity), mentity));
+        friendEntities.forEach(fentity -> compound.putString("FriendEntity" + friendEntities.indexOf(fentity), fentity));
+        enemyEntities.forEach(eentity -> compound.putString("EnemyEntity" + enemyEntities.indexOf(eentity), eentity));
 
         return compound;
     }
