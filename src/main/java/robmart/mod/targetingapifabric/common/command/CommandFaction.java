@@ -10,8 +10,10 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.faction.Faction;
+import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -27,10 +29,10 @@ public class CommandFaction {
                             Targeting.getFactionList().forEach((faction -> builder.suggest(faction.getName())));
                             return builder.buildFuture();
                         })
-                        .executes((ctx) -> addToFaction(StringArgumentType.getString(ctx, "faction"),
+                        .executes((ctx) -> addToFaction(ctx.getSource(), StringArgumentType.getString(ctx, "faction"),
                             ctx.getSource().getPlayerOrThrow()))
                         .then(CommandManager.argument("entities", EntityArgumentType.entities())
-                            .executes((ctx) -> addToFaction(StringArgumentType.getString(ctx, "faction"),
+                            .executes((ctx) -> addToFaction(ctx.getSource(), StringArgumentType.getString(ctx, "faction"),
                                 EntityArgumentType.getEntities(ctx, "entities")))))
                 ).then(CommandManager.literal("get")
                     .then(CommandManager.argument("player", EntityArgumentType.players())
@@ -51,17 +53,26 @@ public class CommandFaction {
         return 1;
     }
 
-    private static int addToFaction(String faction, PlayerEntity entity) throws CommandSyntaxException {
+    private static int addToFaction(ServerCommandSource source, String faction, PlayerEntity entity) throws CommandSyntaxException {
         Faction iFaction = Targeting.getFaction(faction);
         iFaction.addMemberEntity(entity);
+
+        source.sendFeedback(Text.translatable("commands.kill.success.single", entity.getDisplayName()), true);
+
         return 1;
     }
 
-    private static int addToFaction(String faction, Collection<? extends Entity> entities) throws CommandSyntaxException {
+    private static int addToFaction(ServerCommandSource source, String faction, Collection<? extends Entity> entities) throws CommandSyntaxException {
         Faction iFaction = Targeting.getFaction(faction);
 
         for (Entity entity : entities) {
             iFaction.addMemberEntity(entity);
+        }
+
+        if (entities.size() == 1) {
+            source.sendFeedback(Text.translatable("commands." + Reference.MOD_ID + ".faction.success.single", entities.iterator().next().getDisplayName()), true);
+        } else {
+            source.sendFeedback(Text.translatable("commands." + Reference.MOD_ID + ".faction.success.multiple", entities.size()), true);
         }
 
         return 1;
