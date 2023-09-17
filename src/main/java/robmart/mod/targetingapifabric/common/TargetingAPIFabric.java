@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.passive.*;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.command.TeamCommand;
 import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 import robmart.mod.targetingapifabric.api.reference.Reference;
