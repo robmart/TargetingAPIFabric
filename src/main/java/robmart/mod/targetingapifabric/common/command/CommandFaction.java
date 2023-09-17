@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.argument.EntityArgumentType;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
@@ -11,6 +12,9 @@ import net.minecraft.text.LiteralTextContent;
 import net.minecraft.text.MutableText;
 import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.faction.Faction;
+
+import java.util.Collection;
+import java.util.Iterator;
 
 public class CommandFaction {
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -25,9 +29,9 @@ public class CommandFaction {
                         })
                         .executes((ctx) -> addToFaction(StringArgumentType.getString(ctx, "faction"),
                             ctx.getSource().getPlayerOrThrow()))
-                        .then(CommandManager.argument("entity", EntityArgumentType.players())
+                        .then(CommandManager.argument("entities", EntityArgumentType.entities())
                             .executes((ctx) -> addToFaction(StringArgumentType.getString(ctx, "faction"),
-                                (PlayerEntity) EntityArgumentType.getEntity(ctx, "entity")))))
+                                EntityArgumentType.getEntities(ctx, "entities")))))
                 ).then(CommandManager.literal("get")
                     .then(CommandManager.argument("player", EntityArgumentType.players())
                         .executes((context -> getFactions(context.getSource(), (PlayerEntity) EntityArgumentType.getEntity(context, "player")))))
@@ -36,7 +40,8 @@ public class CommandFaction {
                         .suggests((ctx, builder) -> {
                             Targeting.getFactionList().forEach((faction -> builder.suggest(faction.getName())));
                             return builder.buildFuture();
-                        }).executes(ctx -> listFactionMembers(ctx.getSource(), StringArgumentType.getString(ctx, "faction")))))
+                        }).executes(ctx -> listFactionMembers(ctx.getSource(), StringArgumentType.getString(ctx, "faction"))))
+                    )
 
         );
     }
@@ -49,6 +54,16 @@ public class CommandFaction {
     private static int addToFaction(String faction, PlayerEntity entity) throws CommandSyntaxException {
         Faction iFaction = Targeting.getFaction(faction);
         iFaction.addMemberEntity(entity);
+        return 1;
+    }
+
+    private static int addToFaction(String faction, Collection<? extends Entity> entities) throws CommandSyntaxException {
+        Faction iFaction = Targeting.getFaction(faction);
+
+        for (Entity entity : entities) {
+            iFaction.addMemberEntity(entity);
+        }
+
         return 1;
     }
 
