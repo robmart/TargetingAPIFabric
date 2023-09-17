@@ -3,6 +3,7 @@ package robmart.mod.targetingapifabric.api.faction;
 import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
+import robmart.mod.targetingapifabric.api.Targeting;
 import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
@@ -41,8 +42,13 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public void setName(String name) {
-        this.name = name;
+    public boolean setName(String name) {
+        if (Targeting.getFaction(name) != null)
+            return false;
+        else {
+            this.name = name;
+            return true;
+        }
     }
 
     @Override
@@ -306,7 +312,7 @@ public class Faction implements IFaction {
     @Override
     public void unloadEntity(Entity entity) {
         if (memberEntities.contains(entity)) {
-            memberEntities.remove(entity);
+            removeMemberEntity(entity);
             int i = 0;
             boolean saved = false;
             if (!unprocessedData.containsKey("UnprocessedMemberEntity" + i)) {
@@ -323,7 +329,7 @@ public class Faction implements IFaction {
                 }
             }
         } else if (friendEntities.contains(entity)) {
-            friendEntities.remove(entity);
+            removeFriendEntity(entity);
             int i = 0;
             boolean saved = false;
             if (!unprocessedData.containsKey("UnprocessedFriendEntity" + i)) {
@@ -340,7 +346,7 @@ public class Faction implements IFaction {
                 }
             }
         } else if (enemyEntities.contains(entity)) {
-            enemyEntities.remove(entity);
+            removeEnemyEntity(entity);
             int i = 0;
             boolean saved = false;
             if (!unprocessedData.containsKey("UnprocessedEnemyEntity" + i)) {
@@ -357,6 +363,11 @@ public class Faction implements IFaction {
                 }
             }
         }
+    }
+
+    @Override
+    public void onDisband() {
+
     }
 
     @Override
