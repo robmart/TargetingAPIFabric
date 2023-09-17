@@ -1,0 +1,5 @@
+{
+  "_comment": "commands",
+  "commands.targetingapifabric.faction.success.single": "%s has been added to the faction",
+  "commands.targetingapifabric.faction.success.multiple": "%s entities have been added to the faction"
+}
