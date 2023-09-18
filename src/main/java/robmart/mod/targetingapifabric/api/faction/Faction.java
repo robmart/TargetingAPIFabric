@@ -25,6 +25,8 @@ public class Faction implements IFaction {
     private final Map<String, Boolean> friendEntities = new HashMap<>();
     private final Map<String, Boolean> enemyEntities = new HashMap<>();
 
+    private final boolean isServerSide;
+
     private String name;
 
     public Faction(String name) {
@@ -32,9 +34,14 @@ public class Faction implements IFaction {
     }
 
     public Faction(String name, boolean permanent) {
+        this(name, permanent, true);
+    }
+
+    public Faction(String name, boolean permanent, boolean isServerSide) {
         super();
         this.name = name;
         this.isPermanent = permanent;
+        this.isServerSide = isServerSide;
     }
 
     @Override
@@ -284,13 +291,13 @@ public class Faction implements IFaction {
 
     @Override
     public void sync() {
-        if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
+        System.out.println("SYNC " + (this.isServerSide) + " " + (Reference.MINECRAFT_SERVER != null));
+        if (this.isServerSide && Reference.MINECRAFT_SERVER != null)
             LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
     }
 
     @Override
     public void readFromNbt(NbtCompound tag) {
-        System.out.println("TEST");
         //Classes
         int i = 0;
         while (tag.contains("MemberClass" + i)) {

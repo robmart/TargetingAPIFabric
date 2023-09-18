@@ -4,6 +4,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.world.WorldProperties;
 import robmart.mod.targetingapifabric.api.Targeting;
+import robmart.mod.targetingapifabric.api.TargetingClient;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 
 public class FactionManager implements IFactionManager {
@@ -32,6 +33,20 @@ public class FactionManager implements IFactionManager {
         });
     }
 
+    public void readClientFromNbt(NbtCompound tag) {
+        tag.getKeys().forEach(key -> {
+            NbtCompound tag2 = (NbtCompound) tag.get(key);
+            Faction faction;
+            try {
+                faction = (Faction) Class.forName(tag2.getString("Class")).getConstructor(String.class, boolean.class, boolean.class).newInstance(tag2.getString("Name"), true, false);
+                TargetingClient.registerFaction(faction);
+                faction.readFromNbt(tag2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     @Override
     public void writeToNbt(NbtCompound tag) {
         Targeting.getFactionList().forEach((faction) -> {
@@ -44,7 +59,8 @@ public class FactionManager implements IFactionManager {
     public void applySyncPacket(PacketByteBuf buf) {
         NbtCompound tag = buf.readNbt();
         if (tag != null) {
-            this.readFromNbt(tag);
+            TargetingClient.clearFactions();
+            this.readClientFromNbt(tag);
         }
     }
 }
