@@ -4,6 +4,7 @@ import dev.onyxstudios.cca.api.v3.component.ComponentV3;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NbtCompound;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,9 +43,9 @@ public interface IFaction {
     void addEnemyEntity(Entity entityToAdd);
     void removeEnemyClass(Class<? extends Entity> classToRemove);
     void removeEnemyEntity(Entity entityToRemove);
-    Set<Object> getAllMembers();
-    Set<Object> getAllFriends();
-    Set<Object> getAllEnemies();
+    Map<Object, Boolean> getAllMembers();
+    Map<Object, Boolean> getAllFriends();
+    Map<Object, Boolean> getAllEnemies();
     void clearMembers();
     void clearFriends();
     void clearEnemies();

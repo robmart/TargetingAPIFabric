@@ -2,6 +2,7 @@ package robmart.mod.targetingapifabric.api.faction;
 
 import com.google.common.collect.Sets;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import robmart.mod.targetingapifabric.api.Targeting;
 
@@ -17,9 +18,9 @@ public class Faction implements IFaction {
     private final List<Class<? extends Entity>> memberClasses = new ArrayList<>();
     private final List<Class<? extends Entity>> friendClasses = new ArrayList<>();
     private final List<Class<? extends Entity>> enemyClasses = new ArrayList<>();
-    private final List<String> memberEntities = new ArrayList<>();
-    private final List<String> friendEntities = new ArrayList<>();
-    private final List<String> enemyEntities = new ArrayList<>();
+    private final Map<String, Boolean> memberEntities = new HashMap<>();
+    private final Map<String, Boolean> friendEntities = new HashMap<>();
+    private final Map<String, Boolean> enemyEntities = new HashMap<>();
 
     private String name;
 
@@ -63,10 +64,12 @@ public class Faction implements IFaction {
 
     @Override
     public void addFriendEntity(Entity entityToAdd) {
-        if (!isFriend(entityToAdd))
-            this.friendEntities.add(entityToAdd.getEntityName());
-
-
+        if (!isFriend(entityToAdd)) {
+            if (entityToAdd instanceof PlayerEntity)
+                this.friendEntities.put(entityToAdd.getEntityName(), true);
+            else
+                this.friendEntities.put(entityToAdd.getEntityName(), false);
+        }
     }
 
     @Override
@@ -95,10 +98,12 @@ public class Faction implements IFaction {
 
     @Override
     public void addMemberEntity(Entity entityToAdd){
-        if (!isMember(entityToAdd))
-            this.memberEntities.add(entityToAdd.getEntityName());
-
-
+        if (!isMember(entityToAdd)) {
+            if (entityToAdd instanceof PlayerEntity)
+                this.memberEntities.put(entityToAdd.getEntityName(), true);
+            else
+                this.memberEntities.put(entityToAdd.getEntityName(), false);
+        }
     }
 
     @Override
@@ -127,10 +132,12 @@ public class Faction implements IFaction {
 
     @Override
     public void addEnemyEntity(Entity entityToAdd) {
-        if (!isEnemy(entityToAdd))
-            this.enemyEntities.add(entityToAdd.getEntityName());
-
-
+        if (!isEnemy(entityToAdd)) {
+            if (entityToAdd instanceof PlayerEntity)
+                this.enemyEntities.put(entityToAdd.getEntityName(), true);
+            else
+                this.enemyEntities.put(entityToAdd.getEntityName(), false);
+        }
     }
 
     @Override
@@ -150,26 +157,26 @@ public class Faction implements IFaction {
     }
 
     @Override
-    public Set<Object> getAllMembers() {
-        Set<Object> memberSet = Sets.newHashSet();
-        memberSet.addAll(this.memberClasses);
-        memberSet.addAll(this.memberEntities);
+    public Map<Object, Boolean> getAllMembers() {
+        Map<Object, Boolean> memberSet = new HashMap<>();
+        this.memberClasses.forEach(mclass -> memberSet.put(mclass, false));
+        memberSet.putAll(this.memberEntities);
         return memberSet;
     }
 
     @Override
-    public Set<Object> getAllFriends() {
-        Set<Object> friendSet = Sets.newHashSet();
-        friendSet.addAll(this.friendClasses);
-        friendSet.addAll(this.friendEntities);
+    public Map<Object, Boolean> getAllFriends() {
+        Map<Object, Boolean> friendSet = new HashMap<>();
+        this.friendClasses.forEach(fclass -> friendSet.put(fclass, false));
+        friendSet.putAll(this.friendEntities);
         return friendSet;
     }
 
     @Override
-    public Set<Object> getAllEnemies() {
-        Set<Object> enemySet = Sets.newHashSet();
-        enemySet.addAll(this.enemyClasses);
-        enemySet.addAll(this.enemyEntities);
+    public Map<Object, Boolean> getAllEnemies() {
+        Map<Object, Boolean> enemySet = new HashMap<>();
+        this.enemyClasses.forEach(eclass -> enemySet.put(eclass, false));
+        enemySet.putAll(this.enemyEntities);
         return enemySet;
     }
 
@@ -212,7 +219,7 @@ public class Faction implements IFaction {
     public boolean isMember(Entity potentialMember){
         if (potentialMember == null) return false;
         if (isMember(potentialMember.getClass())) return true;
-        for (String entity : this.memberEntities) {
+        for (String entity : this.memberEntities.keySet()) {
             if (entity.equals(potentialMember.getEntityName())) return true;
         }
 
@@ -234,7 +241,7 @@ public class Faction implements IFaction {
     public boolean isFriend(Entity potentialFriend){
         if (potentialFriend == null) return false;
         if (isFriend(potentialFriend.getClass())) return true;
-        for (String entity : this.friendEntities) {
+        for (String entity : this.friendEntities.keySet()) {
             if (entity.equals(potentialFriend.getEntityName())) return true;
         }
 
@@ -256,7 +263,7 @@ public class Faction implements IFaction {
     public boolean isEnemy(Entity potentialEnemy){
         if (potentialEnemy == null) return false;
         if (isFriend(potentialEnemy.getClass())) return true;
-        for (String entity : this.enemyEntities) {
+        for (String entity : this.enemyEntities.keySet()) {
             if (entity.equals(potentialEnemy.getEntityName())) return true;
         }
 
@@ -306,20 +313,20 @@ public class Faction implements IFaction {
 
         //Entities
         i = 0;
-        while (tag.contains("MemberEntity" + i)) {
-            memberEntities.add(tag.getString("MemberEntity" + i));
+        while (tag.contains("MemberEntity" + i + "Key")) {
+            memberEntities.put(tag.getString("MemberEntity" + i + "Key"), tag.getBoolean("MemberEntity" + i + "Value"));
             i++;
         }
 
         i = 0;
-        while (tag.contains("FriendEntity" + i)) {
-            memberEntities.add(tag.getString("FriendEntity" + i));
+        while (tag.contains("FriendEntity" + i + "Key")) {
+            memberEntities.put(tag.getString("FriendEntity" + i + "Key"), tag.getBoolean("FriendEntity" + i + "Value"));
             i++;
         }
 
         i = 0;
-        while (tag.contains("EnemyEntity" + i)) {
-            memberEntities.add(tag.getString("EnemyEntity" + i));
+        while (tag.contains("EnemyEntity" + i + "Key")) {
+            memberEntities.put(tag.getString("EnemyEntity" + i + "Key"), tag.getBoolean("EnemyEntity" + i + "Value"));
             i++;
         }
     }
@@ -336,9 +343,21 @@ public class Faction implements IFaction {
         friendClasses.forEach(fclass -> compound.putString("FriendClass" + friendClasses.indexOf(fclass), fclass.getName()));
         enemyClasses.forEach(eclass -> compound.putString("EnemyClass" + enemyClasses.indexOf(eclass), eclass.getName()));
 
-        memberEntities.forEach(mentity -> compound.putString("MemberEntity" + memberEntities.indexOf(mentity), mentity));
-        friendEntities.forEach(fentity -> compound.putString("FriendEntity" + friendEntities.indexOf(fentity), fentity));
-        enemyEntities.forEach(eentity -> compound.putString("EnemyEntity" + enemyEntities.indexOf(eentity), eentity));
+        final int[] i = {0};
+        memberEntities.forEach((mentity, isPlayer) -> {
+            compound.putString("MemberEntity" + i[0] + "Key", mentity);
+            compound.putBoolean("MemberEntity" + i[0]++ + "Value", isPlayer);
+        });
+        i[0] = 0;
+        friendEntities.forEach((fentity, isPlayer) -> {
+            compound.putString("FriendEntity" + i[0] + "Key", fentity);
+            compound.putBoolean("FriendEntity" + i[0]++ + "Value", isPlayer);
+        });
+        i[0] = 0;
+        enemyEntities.forEach((eentity, isPlayer) -> {
+            compound.putString("EnemyEntity" + i[0] + "Key", eentity);
+            compound.putBoolean("EnemyEntity" + i[0]++ + "Value", isPlayer);
+        });
 
         return compound;
     }
