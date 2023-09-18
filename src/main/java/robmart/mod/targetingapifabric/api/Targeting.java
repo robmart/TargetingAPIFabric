@@ -1,6 +1,7 @@
 package robmart.mod.targetingapifabric.api;
 
 import com.google.common.collect.ImmutableList;
+import dev.onyxstudios.cca.api.v3.level.LevelComponents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.TameableEntity;
@@ -8,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.predicate.entity.EntityPredicates;
 import net.minecraft.scoreboard.Team;
 import robmart.mod.targetingapifabric.api.faction.Faction;
+import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
 
@@ -27,6 +29,8 @@ public class Targeting {
      */
     public static void clearFactions(){
         factionList.clear();
+        if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
+            LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
     }
 
     /**
@@ -39,6 +43,8 @@ public class Targeting {
                 return false;
         }
         factionList.add(newFaction);
+        if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
+            LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
         return true;
     }
 
@@ -49,13 +55,16 @@ public class Targeting {
     public static void disbandFaction(Faction faction){
         if (factionList.removeIf(faction1 -> faction == faction1)) {
             faction.onDisband();
+
+            if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
+                LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
         }
     }
 
     /**
      * Gets faction from name
      * @param factionName The name of the requested faction
-     * @return The requested faction
+     * @return The requested faction, or null if the faction foes not exist
      */
     public static Faction getFaction(String factionName){
         for (Faction faction : factionList) {
