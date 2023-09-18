@@ -79,7 +79,7 @@ curseforge {
 
         relations {
             requiredDependency 'fabric-api'
-            requiredDependency 'cardinal-components'
+            requiredDependency 'cardinal-components-api'
         }
     }
     options {
