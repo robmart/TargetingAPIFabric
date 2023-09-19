@@ -35,6 +35,9 @@ public class TargetingAPIFabric implements ModInitializer {
             animals.addMemberClass(SquidEntity.class);
             animals.addMemberClass(MooshroomEntity.class);
             Targeting.registerFaction(animals);
+
+//            Faction test = new Faction("TEST");
+//            Targeting.registerFaction(test);
         }));
 
         ServerLifecycleEvents.SERVER_STOPPED.register((server -> {

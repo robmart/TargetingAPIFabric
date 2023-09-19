@@ -291,7 +291,6 @@ public class Faction implements IFaction {
 
     @Override
     public void sync() {
-        System.out.println("SYNC " + (this.isServerSide) + " " + (Reference.MINECRAFT_SERVER != null));
         if (this.isServerSide && Reference.MINECRAFT_SERVER != null)
             LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
     }

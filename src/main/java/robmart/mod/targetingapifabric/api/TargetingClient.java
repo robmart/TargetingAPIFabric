@@ -31,7 +31,6 @@ public class TargetingClient {
      */
     public static void clearFactions(){
         factionList.clear();
-        System.out.println("Client Clear");
     }
 
     /**
@@ -40,7 +39,6 @@ public class TargetingClient {
      */
     public static boolean registerFaction(Faction newFaction){
         factionList.add(newFaction);
-        System.out.println("Client Register");
         return true;
     }
 
