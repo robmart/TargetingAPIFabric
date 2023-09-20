@@ -10,8 +10,9 @@ import robmart.mod.targetingapifabric.api.faction.manager.IFactionManager;
 
 public class TAPILevelComponents implements LevelComponentInitializer {
     /**
-    * You are never supposed to use this
-     */
+     * You are never supposed to use this
+     * @see Targeting
+     **/
     public static final ComponentKey<IFactionManager> FACTION_MANAGER =
             ComponentRegistryV3.INSTANCE.getOrCreate(new Identifier("targetingapifabric:faction"), IFactionManager.class);
 

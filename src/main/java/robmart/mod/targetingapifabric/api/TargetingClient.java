@@ -11,12 +11,11 @@ import net.minecraft.scoreboard.Team;
 import robmart.mod.targetingapifabric.api.faction.Faction;
 import robmart.mod.targetingapifabric.api.reference.Reference;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 
-/**
- * @see TargetingClient for client-side operations
- */
-public class Targeting {
+public class TargetingClient {
 
     private static final List<Faction> factionList = new ArrayList<>();
 
@@ -32,8 +31,6 @@ public class Targeting {
      */
     public static void clearFactions(){
         factionList.clear();
-        if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
-            LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
     }
 
     /**
@@ -41,13 +38,7 @@ public class Targeting {
      * @param newFaction The faction that should be registered
      */
     public static boolean registerFaction(Faction newFaction){
-        for (Faction faction : factionList) {
-            if (faction.getName().equals(newFaction.getName()))
-                return false;
-        }
         factionList.add(newFaction);
-        if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
-            LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
         return true;
     }
 
@@ -56,12 +47,7 @@ public class Targeting {
      * @param faction The faction that should be removed
      */
     public static void disbandFaction(Faction faction){
-        if (factionList.removeIf(faction1 -> faction == faction1)) {
-            faction.onDisband();
-
-            if (Reference.MINECRAFT_SERVER != null && !Reference.MINECRAFT_SERVER.isLoading())
-                LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
-        }
+        factionList.removeIf(faction1 -> faction == faction1);
     }
 
     /**
@@ -79,7 +65,7 @@ public class Targeting {
 
     public static List<Faction> getFactionsFromEntity(Entity entity) {
         List<Faction> factionList = new ArrayList<>();
-        for (Faction faction : Targeting.factionList) {
+        for (Faction faction : TargetingClient.factionList) {
             if (faction.isMember(entity))
                 factionList.add(faction);
         }
@@ -133,34 +119,15 @@ public class Targeting {
      * @return Whether the two entities are on the same scoreboard team
      */
     public static boolean isSameTeam(Entity caster, Entity target) {
-        Team myTeam = (Team) caster.getScoreboardTeam();
-        Team otherTeam = (Team) target.getScoreboardTeam();
-        return myTeam != null && otherTeam != null && myTeam.isEqual(otherTeam);
+        return Targeting.isSameTeam(caster, target);
     }
 
-    public static Entity getRootEntity(Entity source) {
-        Entity controller = source.getPrimaryPassenger();
-        if (controller != null) {
-            return getRootEntity(controller);
-        }
-
-        if (source instanceof TameableEntity owned) {
-            Entity owner = owned.getOwner();
-            if (owner != null) {
-                // Owner is online, so use it for relationship checks
-                return getRootEntity(owner);
-            } else if (owned.getOwner() != null) {
-                // Entity is owned, but the owner is offline
-                // If the owner is offline then there's not much we can do.
-                return source;
-            }
-        }
-
-        return source;
+    private static Entity getRootEntity(Entity source) {
+        return Targeting.getRootEntity(source);
     }
 
     public static boolean areEntitiesEqual(Entity first, Entity second) {
-        return first != null && second != null && first.getUuid().compareTo(second.getUuid()) == 0;
+        return Targeting.areEntitiesEqual(first, second);
     }
 
     public static TargetRelationEnum getTargetRelation(Entity source, Entity target) {
@@ -223,7 +190,6 @@ public class Targeting {
         return null;
     }
 
-
     static boolean validCheck(Entity caster, Entity target, EnumSet<TargetRelationEnum> relations) {
         Entity casterRoot = getRootEntity(caster);
         Entity targetRoot = getRootEntity(target);
@@ -258,4 +224,5 @@ public class Targeting {
     public static boolean hasRelation(Entity caster, Entity target) {
         return !isValidNeutral(caster, target);
     }
+
 }

@@ -17,6 +17,7 @@ public class TargetingAPIFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         ServerLifecycleEvents.SERVER_STARTING.register((server -> {
+            Reference.MINECRAFT_SERVER = server;
             Faction animals = new Faction("FarmAnimals", false);
             animals.addFriendClass(PlayerEntity.class);
             animals.addMemberClass(CowEntity.class);
@@ -34,10 +35,14 @@ public class TargetingAPIFabric implements ModInitializer {
             animals.addMemberClass(SquidEntity.class);
             animals.addMemberClass(MooshroomEntity.class);
             Targeting.registerFaction(animals);
+
+//            Faction test = new Faction("TEST");
+//            Targeting.registerFaction(test);
         }));
 
         ServerLifecycleEvents.SERVER_STOPPED.register((server -> {
             Targeting.clearFactions();
+            Reference.MINECRAFT_SERVER = null;
         }));
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> CommandFaction.register(dispatcher));

@@ -1,10 +1,13 @@
 package robmart.mod.targetingapifabric.api.faction;
 
 import com.google.common.collect.Sets;
+import dev.onyxstudios.cca.api.v3.level.LevelComponents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import robmart.mod.targetingapifabric.api.TAPILevelComponents;
 import robmart.mod.targetingapifabric.api.Targeting;
+import robmart.mod.targetingapifabric.api.reference.Reference;
 
 import java.util.*;
 
@@ -22,6 +25,8 @@ public class Faction implements IFaction {
     private final Map<String, Boolean> friendEntities = new HashMap<>();
     private final Map<String, Boolean> enemyEntities = new HashMap<>();
 
+    private final boolean isServerSide;
+
     private String name;
 
     public Faction(String name) {
@@ -29,9 +34,14 @@ public class Faction implements IFaction {
     }
 
     public Faction(String name, boolean permanent) {
+        this(name, permanent, true);
+    }
+
+    public Faction(String name, boolean permanent, boolean isServerSide) {
         super();
         this.name = name;
         this.isPermanent = permanent;
+        this.isServerSide = isServerSide;
     }
 
     @Override
@@ -45,6 +55,7 @@ public class Faction implements IFaction {
             return false;
         else {
             this.name = name;
+            sync();
             return true;
         }
     }
@@ -56,10 +67,10 @@ public class Faction implements IFaction {
 
     @Override
     public void addFriendClass(Class<? extends Entity> classToAdd) {
-        if (!isFriend(classToAdd))
+        if (!isFriend(classToAdd)) {
             this.friendClasses.add(classToAdd);
-
-
+            sync();
+        }
     }
 
     @Override
@@ -69,31 +80,33 @@ public class Faction implements IFaction {
                 this.friendEntities.put(entityToAdd.getEntityName(), true);
             else
                 this.friendEntities.put(entityToAdd.getEntityName(), false);
+
+            sync();
         }
     }
 
     @Override
     public void removeFriendClass(Class<? extends Entity> classToRemove) {
-        if (isFriend(classToRemove))
+        if (isFriend(classToRemove)) {
             this.friendClasses.remove(classToRemove);
-
-
+            sync();
+        }
     }
 
     @Override
     public void removeFriendEntity(Entity entityToRemove) {
-        if (isFriend(entityToRemove))
+        if (isFriend(entityToRemove)) {
             this.friendEntities.remove(entityToRemove.getEntityName());
-
-
+            sync();
+        }
     }
 
     @Override
     public void addMemberClass(Class<? extends Entity> classToAdd){
-        if (!isMember(classToAdd))
+        if (!isMember(classToAdd)) {
             this.memberClasses.add(classToAdd);
-
-
+            sync();
+        }
     }
 
     @Override
@@ -103,31 +116,33 @@ public class Faction implements IFaction {
                 this.memberEntities.put(entityToAdd.getEntityName(), true);
             else
                 this.memberEntities.put(entityToAdd.getEntityName(), false);
+
+            sync();
         }
     }
 
     @Override
     public void removeMemberClass(Class<? extends Entity> classToRemove) {
-        if (isMember(classToRemove))
+        if (isMember(classToRemove)) {
             this.memberClasses.remove(classToRemove);
-
-
+            sync();
+        }
     }
 
     @Override
     public void removeMemberEntity(Entity entityToRemove) {
-        if (isMember(entityToRemove))
+        if (isMember(entityToRemove)) {
             this.memberEntities.remove(entityToRemove.getEntityName());
-
-
+            sync();
+        }
     }
 
     @Override
     public void addEnemyClass(Class<? extends Entity> classToAdd) {
-        if (!isEnemy(classToAdd))
+        if (!isEnemy(classToAdd)) {
             this.enemyClasses.add(classToAdd);
-
-
+            sync();
+        }
     }
 
     @Override
@@ -137,23 +152,25 @@ public class Faction implements IFaction {
                 this.enemyEntities.put(entityToAdd.getEntityName(), true);
             else
                 this.enemyEntities.put(entityToAdd.getEntityName(), false);
+
+            sync();
         }
     }
 
     @Override
     public void removeEnemyClass(Class<? extends Entity> classToRemove) {
-        if (isEnemy(classToRemove))
+        if (isEnemy(classToRemove)) {
             this.enemyClasses.remove(classToRemove);
-
-
+            sync();
+        }
     }
 
     @Override
     public void removeEnemyEntity(Entity entityToRemove) {
-        if (isEnemy(entityToRemove))
+        if (isEnemy(entityToRemove)) {
             this.enemyEntities.remove(entityToRemove.getEntityName());
-
-
+            sync();
+        }
     }
 
     @Override
@@ -184,24 +201,21 @@ public class Faction implements IFaction {
     public void clearMembers(){
         this.memberClasses.clear();
         this.memberEntities.clear();
-
-
+        sync();
     }
 
     @Override
     public void clearFriends() {
         this.friendClasses.clear();
         this.friendEntities.clear();
-
-
+        sync();
     }
 
     @Override
     public void clearEnemies() {
         this.enemyClasses.clear();
         this.enemyEntities.clear();
-
-
+        sync();
     }
 
     @Override
@@ -273,6 +287,12 @@ public class Faction implements IFaction {
     @Override
     public void onDisband() {
 
+    }
+
+    @Override
+    public void sync() {
+        if (this.isServerSide && Reference.MINECRAFT_SERVER != null)
+            LevelComponents.sync(TAPILevelComponents.FACTION_MANAGER, Reference.MINECRAFT_SERVER);
     }
 
     @Override
