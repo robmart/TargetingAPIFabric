@@ -65,6 +65,10 @@ public class Faction implements IFaction {
         return this.isPermanent;
     }
 
+    public boolean isServerSide() {
+        return isServerSide;
+    }
+
     @Override
     public void addFriendClass(Class<? extends Entity> classToAdd) {
         if (!isFriend(classToAdd)) {
